@@ -28,6 +28,10 @@ var ScriptBud = {
 		this.onCharacterSpeak = cb;
 	},
 
+	onLine: function(cb) {
+		this.onLine = cb;
+	},
+
 	loadScript: function(script) {
 		this.script = plays[script];
 		this.voices = {};
@@ -204,6 +208,10 @@ var ScriptBud = {
 		/* callback */
 		if (this.onCharacterSpeak) {
 			this.onCharacterSpeak(currentCharacter);
+		}
+
+		if (this.onLine) {
+			this.onLine(currentLine);
 		}
 
 		if (this.humans.includes(currentCharacter)) {

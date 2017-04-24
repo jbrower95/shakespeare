@@ -28,6 +28,17 @@ function setupScript(play) {
 		});
 
 		ScriptBud.readAs("bernardo");
+		ScriptBud.onLine(function(line) {
+
+			let content = line["content"];
+			let line_no = line["line"];
+
+			if (line_no) {
+				$("#currentLineNo").text(line_no);
+			}
+
+			$("#currentLineText").text(content);
+		});
 		ScriptBud.onCharacterSpeak(function(character) {
 			faces.display("charDiv", char_faces[character]);
 			$("#charName").text(character);

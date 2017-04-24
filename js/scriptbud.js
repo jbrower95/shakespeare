@@ -34,6 +34,8 @@ var ScriptBud = {
 
 	loadScript: function(script) {
 		this.script = plays[script];
+		console.log("[scriptbud] Loaded script for " + script);
+		console.log(this.script);
 		this.voices = {};
 
 		/* map a voice for each character */

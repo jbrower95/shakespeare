@@ -1,0 +1,41 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	font-family: "Times New Roman"
+}
+
+h1 {
+	font-size: 50px;
+	padding: 20px;
+	display: block;
+}
+
+#fullpage {
+	padding: 50px;
+	text-align: center;
+}
+
+#character {
+	position: relative;
+}
+
+#contents {
+	font-size: 25px;
+}
+
+#charDiv {
+	padding-top: 40px;
+	position: absolute;
+	width: 300px;
+	height: 400px;
+}
+
+#charName {
+	font-style: italic;
+}
+
+#helpbar {
+	position: absolute;
+	bottom: 0px;
+	padding: 5px;
+}

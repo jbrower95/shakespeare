@@ -87,6 +87,7 @@
         e.setAttribute("fill", "none");
     });
 
+    /* <this is pretty overtly racist i think>
     eye.push(function (paper, lr, cx, cy, angle) {
         // Horizontal
         var e, x = cx - 30, y = cy;
@@ -99,6 +100,8 @@
         e.setAttribute("fill", "none");
         rotateCentered(e, (lr === "l" ? angle : -angle));
     });
+    */
+
     eye.push(function (paper, lr, cx, cy, angle) {
         // Normal (circle with a dot in it)
         var e, x = cx, y = cy + 20;

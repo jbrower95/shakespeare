@@ -128,6 +128,8 @@
                        "a 20,15 0 1 1 0.1,0");
         rotateCentered(e, (lr === "l" ? angle : -angle));
     });
+
+    /*
     eye.push(function (paper, lr, cx, cy, angle) {
         // Arc eyelid
         var e, x = cx, y = cy + 20;
@@ -145,6 +147,7 @@
         e.setAttribute("fill", "none");
         rotateCentered(e, (lr === "l" ? angle : -angle));
     });
+    */
 
     nose.push(function (paper, cx, cy, size) {
         // V

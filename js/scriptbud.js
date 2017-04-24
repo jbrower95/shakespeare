@@ -4,12 +4,31 @@ var ScriptBud = {
 		this.humans = [];
 		this.script = null;
 		this.stopped = true;
-		this.timeout = 6000;
-		
+		this.timeout = 10 * 1000;
+
 		if (typeof SpeechRecognition === "undefined" && typeof webkitSpeechRecognition === "undefined") {
 			console.error("[scriptbud] No speech recognition available in this browser. The plugin will not function. (Try chrome).");
 			return false;
 		}
+
+		this.boo_sound = new Pizzicato.Sound('./sound/boo.mp3', function() {
+		    // Sound loaded!
+		    console.log("[scriptbud] Loaded audio.");
+		});
+		this.boo = $.proxy(function() {
+			if (this.boo_sound) {
+				this.boo_sound.play();
+			}
+		}, this);
+
+		let self = this;
+		this.loaded_clap_sounds = {};
+
+		let clap_sounds = $.map(["applause5.mp3", "applause6.mp3", "applause7.mp3"], (obj) => new Pizzicato.Sound('./sound/' + obj, function() {
+		    // Sound loaded!
+		    self.loaded_clap_sounds[obj] = clap_sounds[obj];
+		    console.log("[scriptbud] Loaded " + obj);
+		}));
 		
 		this.SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
 		this.SpeechGrammarList = webkitSpeechGrammarList || SpeechGrammarList;
@@ -18,6 +37,14 @@ var ScriptBud = {
 		this.waiting = false;
 
 		return true;
+	},
+
+	clap: function() {
+		if (this.loaded_clap_sounds) {
+			let randClap = this.loaded_clap_sounds[Math.floor(Math.random() * this.loaded_clap_sounds.length)]
+			if (randClap)
+				randClap.play();
+		}
 	},
 
 	getCharacters: function() {
@@ -43,7 +70,7 @@ var ScriptBud = {
 
 		for (let idx in this.script["characters"]) {
 			let character = this.script["characters"][idx];
-			let pitch = Math.floor((Math.random() * 4) + 1);
+			let pitch = Math.floor((Math.random() * 4) + .5);
 			let role = roles[Math.floor(Math.random() * roles.length)]
 			this.voices[character] = function(t, onEnd) {
 				console.log("[" + character + "]: " + t);
@@ -69,13 +96,9 @@ var ScriptBud = {
 			if (this.currentIdx === currentLine) {
 				console.log("Checking for timeout...");
 				/* nothing has changed. */
-				if (!this.recv) {
-					console.log("[error] Line timed out.");
-					this.step();
-				} else {
-					console.log("[error] false timeout.");
-					this.recv = false;
-				}
+				console.log("[error] Line timed out.");
+				this.boo(); // BOOOOOO
+				this.step();
 			}
 		}, this), amt);
 	},
@@ -96,7 +119,6 @@ var ScriptBud = {
 
 		/* Indicate for timeout that we have received something. */
 		this.recv = true;
-		this.__cancelTimeout();
 
 		let currentLine = this.script["lines"][this.currentIdx]["content"];
 
@@ -123,8 +145,8 @@ var ScriptBud = {
 					.replace(/[^\w\s]|_/g, "")
 	         		.replace(/\s+/g, " ")
 					.split(/[ ,]+/);
-				console.log("spkn: " + spoken_words);
-				console.log("waiting for: " + words);
+				// console.log("spkn: " + spoken_words);
+				// console.log("waiting for: " + words);
 
 				for (var i = 0; i < spoken_words.length; i++) {
 					for (var j = 0; j < words.length; j++) {
@@ -135,7 +157,7 @@ var ScriptBud = {
 					}
 				}
 			}
-			console.log("Got " + hits + " hits. (lastHit=" + lastHit + ")");
+			// console.log("Got " + hits + " hits. (lastHit=" + lastHit + ")");
 
 			let progress = lastHit + 1;
 			this.wordTicker = this.wordTicker + progress;
@@ -144,11 +166,14 @@ var ScriptBud = {
 				console.log("Success");
 				this.waiting = false;
 				this.__startTrackingAudio(false);
+
+				if (Math.random() > .5) {
+					// clapping every time is fkning annoying
+					this.clap();
+				}
 				this.step();
 				return;
 			}
-
-			this.__timeoutAfter(this.timeout);	
 		}
 	},
 
@@ -187,6 +212,15 @@ var ScriptBud = {
 
 	isPlaying: function() {
 		return !this.stopped;
+	},
+
+	next: function() {
+		this.step();
+	},
+
+	previous: function() {
+		this.currentIdx = this.currentIdx - 2;
+		this.step();
 	},
 
 	step: function() {

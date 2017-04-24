@@ -16,6 +16,7 @@ $(document).ready(function() {
 var SHOWING_MODAL = false;
 
 $(document).keyup(function(e) {
+	console.log(e.keyCode);
     if (e.keyCode == 27) { // escape key maps to keycode `27`
     	if (!SHOWING_MODAL) {
     		showModal();
@@ -23,6 +24,18 @@ $(document).keyup(function(e) {
     		hideModal();
     	}
     	SHOWING_MODAL = !SHOWING_MODAL;
+    }
+    if (e.keyCode == 39) {
+    	// -->
+    	if (ScriptBud.isPlaying()) {
+    		// next
+    		ScriptBud.next();
+    	} else {
+    		ScriptBud.previous();
+    	}
+    } 
+    if (e.keycode == 37) {
+    	// <--
     }
 });
 
@@ -144,6 +157,8 @@ function createModal() {
 		/* otherwise, start reading. */
 		hideModal();
 		setupScript(play, character);
+		openCurtain();
+		ScriptBud.clap();
 		ScriptBud.start();
 	});
 	ok = $(ok);
@@ -165,15 +180,41 @@ function hideModal() {
 	modal.remove();
 }
 
+function openCurtain() {
+	let left = $("#curtain_left");
+	let right = $("#curtain_right");
+
+	left.animate({
+		left: -500
+	}, 2000);
+
+	right.animate({
+		right: -500
+	}, 2000);
+}
+
+function closeCurtain() {
+	let left = $("#curtain_left");
+	let right = $("#curtain_right");
+
+	left.animate({
+		left: 0
+	}, 2000);
+
+	right.animate({
+		right: 0
+	}, 2000);
+}
+
 function setupScript(play, character) {
 	if (ScriptBud.init()) {
 		// Browser is supported. 
 		ScriptBud.loadScript(play);
-		$("currentPlay").text(play);
+		$("#playname").text(play);
 
 		let characters = ScriptBud.getCharacters();
 
-		let padding = 200 + 338;
+		let padding = 200 + 400;
 
 		/* Generate a bunch of faces. */
 		characters.forEach(function(character) {

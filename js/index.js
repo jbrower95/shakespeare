@@ -16,7 +16,7 @@ $(document).ready(function() {
 var SHOWING_MODAL = false;
 
 $(document).keyup(function(e) {
-	console.log(e.keyCode);
+	// console.log(e.keyCode);
     if (e.keyCode == 27) { // escape key maps to keycode `27`
     	if (!SHOWING_MODAL) {
     		showModal();
@@ -32,12 +32,13 @@ $(document).keyup(function(e) {
     	if (ScriptBud.isPlaying()) {
     		// next
     		ScriptBud.next();
-    	} else {
-    		ScriptBud.previous();
-    	}
+    	} 
     } 
     if (e.keycode == 37) {
     	// <--
+    	if (ScriptBud.isPlaying()) {
+    		ScriptBud.previous();
+    	}
     }
 });
 
@@ -196,11 +197,17 @@ function showModal() {
 		modal = createModal();
 		$("#fullpage").append(modal);
 	}
+	if (ScriptBud.isPlaying()) {
+		ScriptBud.stop();
+	}
 	modal.show();
 }
 
 function hideModal() {
 	modal.hide();
+	if (!ScriptBud.isPlaying() && ScriptBud.currentIdx > 0) {
+		ScriptBud.resume();
+	}
 }
 
 function openCurtain() {
@@ -260,10 +267,14 @@ function setupScript(play, character) {
 			$("#currentLineText").text(content);
 		});
 		ScriptBud.onCharacterSpeak(function(character) {
-			faces.display("charDiv", char_faces[character]);
-			$("#charName").text(character);
-			$("#charDiv").css("left", char_lefts[character]);
-			$("#charName").css("left", char_lefts[character]);
+			if (char_faces[character]) {
+				faces.display("charDiv", char_faces[character]);
+				$("#charName").text(character);
+				$("#charDiv").css("left", char_lefts[character]);
+				$("#charName").css("left", char_lefts[character]);
+			} else {
+				console.error("No face bound for " + character);
+			}
 		});
 	} else {
 		// Browser unsupported.

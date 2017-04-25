@@ -20,8 +20,10 @@ $(document).keyup(function(e) {
     if (e.keyCode == 27) { // escape key maps to keycode `27`
     	if (!SHOWING_MODAL) {
     		showModal();
+    		closeCurtain();
     	} else {
     		hideModal();
+    		openCurtain();
     	}
     	SHOWING_MODAL = !SHOWING_MODAL;
     }
@@ -46,9 +48,22 @@ function list2datalist(id, values) {
 	let datalist = document.createElement("datalist");
 	datalist.id = id;
 
+	let mappings = {
+		"asyoulikeit" : "As you like it",
+		"hamlet" : "Hamlet",
+		"allswell" : "All's well that ends well",
+		"tamingshrew" : "The Taming of the Shrew",
+		"comedyerrors" : "A comedy of errors",
+		"antonycleo" : "Antony and Cleopatra",
+		"romeojuliet" : "Romeo and Juliet",
+		"tempest" : "The Tempest",
+		"12night" : "Twelfth Night"
+	};
+
 	values.forEach(function(obj) {
 		let elt = document.createElement("option");
 		elt.value = obj;
+		elt.innerHTML = mappings[obj] || obj;
 		datalist.append(elt);
 	});
 	return datalist;
@@ -66,6 +81,7 @@ function createModal() {
 	menu.style.height = "100%";
 	menu.style.position = "fixed";
 	menu.style.left = 0;
+	menu.style.zIndex = 10;
 	menu.style.top = 0;
 	menu = $(menu);
 
@@ -76,6 +92,7 @@ function createModal() {
 	innermenu.style.display = "flex";
 	innermenu.style.flexDirection = "column";
 	innermenu.style.alignItems = "center";
+	innermenu.style.zIndex = 100;
 	innermenu = $(innermenu);
 
 	/* add actual options. */
@@ -89,15 +106,17 @@ function createModal() {
 	innermenu.append(header);
 
 	//		Choose play: <plays>
-	let choice = document.createElement("input");
+	let choice = document.createElement("select");
 	choice.id = "__choosePlay";
 	choice.style.display = "block";
 	choice.style.width = "150px";
-	choice.setAttribute('list', 'plays');
-	choice.setAttribute('type', 'dropdown');
+	choice.placeholder = "play name";
 	choice.style.margin = "20px";
+	choice = $(choice);
 
-	innermenu.append(list2datalist("plays", Object.keys(plays)));
+	$($(list2datalist("plays", Object.keys(plays))).children()).each(function(i,o) {
+		choice.append(o);
+	});
 	innermenu.append(choice);
 
 	$(function() {
@@ -109,25 +128,27 @@ function createModal() {
 	    if (plays[val]) {
 			let characters = plays[val]["characters"];
 			let data = $(list2datalist("plays", characters, true));
-			$("#characters").empty();
+			$("#__chooseCharacter").empty();
 			data.children().each(function(idx, child) {
-				$("#characters").append(child);
+				$("#__chooseCharacter").append(child);
 			});
 		}
 	  }); 
 	});
 
-	let choice2 = document.createElement("input");
+	let choice2 = document.createElement("select");
 	choice2.id = "__chooseCharacter";
 	choice2.style.display = "block";
 	choice2.style.width = "150px";
 	choice2.style.margin = "15px";
-	choice2.setAttribute('list', 'characters');
-	choice2.setAttribute('type', 'dropdown');
+	choice2.placeholder = "character name";
 	choice2.style.margin = "20px";
 	choice2 = $(choice2);
 	
-	innermenu.append($(list2datalist("characters", [])));
+	$(list2datalist("characters", [])).each(function(idx, obj) {
+		choice2.append(obj);
+	});
+
 	innermenu.append(choice2);
 
 	/* finally, the OK button. */
@@ -137,7 +158,7 @@ function createModal() {
 	ok.style.height = "40px";
 	ok.style.margin = "7px";
 	$(ok).click(function() {
-
+		console.log("OK click.");
 		let play = $("#__choosePlay").val();
 		let character = $("#__chooseCharacter").val();
 		
@@ -156,6 +177,7 @@ function createModal() {
 
 		/* otherwise, start reading. */
 		hideModal();
+		$("#charDiv").empty();
 		setupScript(play, character);
 		openCurtain();
 		ScriptBud.clap();
@@ -172,12 +194,13 @@ function createModal() {
 function showModal() {
 	if (modal == null) {
 		modal = createModal();
+		$("#fullpage").append(modal);
 	}
-	$("#fullpage").append(modal);
+	modal.show();
 }
 
 function hideModal() {
-	modal.remove();
+	modal.hide();
 }
 
 function openCurtain() {
@@ -185,11 +208,11 @@ function openCurtain() {
 	let right = $("#curtain_right");
 
 	left.animate({
-		left: -500
+		left: -800
 	}, 2000);
 
 	right.animate({
-		right: -500
+		right: -800
 	}, 2000);
 }
 
@@ -217,6 +240,8 @@ function setupScript(play, character) {
 		let padding = 200 + 400;
 
 		/* Generate a bunch of faces. */
+		char_faces = {};
+		char_lefts = {};
 		characters.forEach(function(character) {
 			char_faces[character] = faces.generate();
 			char_lefts[character] = Math.ceil(((Math.random() * $(window).width()) + padding) - padding);
@@ -247,23 +272,5 @@ function setupScript(play, character) {
 }
 
 let playing = null;
-
-
-// $("body").click(function(){
-// 	if (!SHOWING_MODAL) {
-// 		if (!ScriptBud.isPlaying()) {
-// 			if (playing == null) {
-// 				ScriptBud.start();
-// 				playing = 1;
-// 			} else {
-// 				ScriptBud.resume();
-// 				$("#character").css("opacity", 1);
-// 			}
-// 		} else {
-// 			ScriptBud.stop();
-// 			$("#character").css("opacity", .4);
-// 		}
-// 	}
-// });
 
 

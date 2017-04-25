@@ -42,8 +42,9 @@ var ScriptBud = {
 	clap: function() {
 		if (this.loaded_clap_sounds) {
 			let randClap = this.loaded_clap_sounds[Math.floor(Math.random() * this.loaded_clap_sounds.length)]
-			if (randClap)
+			if (randClap) {
 				randClap.play();
+			}
 		}
 	},
 

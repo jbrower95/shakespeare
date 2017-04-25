@@ -47,6 +47,7 @@ h1 {
 	left: 0px;
 	top: 0px;
 	padding: 0px;
+	z-index: 10;
 }
 
 #curtain img {

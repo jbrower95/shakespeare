@@ -41,6 +41,7 @@ var ScriptBud = {
 
 	clap: function() {
 		if (this.loaded_clap_sounds) {
+			console.log("[scriptbud] Clapping.");
 			let randClap = this.loaded_clap_sounds[Math.floor(Math.random() * this.loaded_clap_sounds.length)]
 			if (randClap) {
 				randClap.play();
@@ -168,7 +169,7 @@ var ScriptBud = {
 				this.waiting = false;
 				this.__startTrackingAudio(false);
 
-				if (Math.random() > .5) {
+				if (Math.random() > .3) {
 					// clapping every time is fkning annoying
 					this.clap();
 				}

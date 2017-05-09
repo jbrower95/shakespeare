@@ -7,11 +7,42 @@ function clamp(a, b, c) {
 
 var char_faces = {};
 var char_lefts = {};
+var rockmeter = {};
+var current_venue = 1;
+
+VENUES = ["img/bg/1.jpg", "img/bg/2.jpg", "img/bg/3.jpg"];
 
 $(document).ready(function() {
 	showModal();
 	ScriptBud.init();
+	changeVenue(1);
+	setupRockMeter();
 });
+
+
+
+function changeVenue(which) {
+	if (which > current_venue) {
+		// better venue
+		ScriptBud.clap();
+	} else if (which < current_venue) {
+		// worse venue
+		ScriptBud.boo();
+	}
+	$('body').css('background-image', 'url(' + VENUES[which] + ')');
+	current_venue = which;
+}
+
+function scoreChanged(satisfaction, score) {
+	$("#score").animateNumber({ number: score });
+	console.log("satisfaction: " + satisfaction);
+	if (satisfaction <= 0) {
+		ScriptBud.boo();
+		ScriptBud.gameover(showModal);
+		ScriptBud.stop();
+		closeCurtain();
+	}
+}
 
 var SHOWING_MODAL = false;
 
@@ -192,6 +223,15 @@ function createModal() {
 	return menu;
 }
 
+function setupRockMeter() {
+	rockmeter = new RockMeter(0, 100);
+	rockmeter.onBecameGreen(()=>changeVenue(2));
+	rockmeter.onBecameYellow(()=>changeVenue(1));
+	rockmeter.onBecameRed(()=>changeVenue(0));
+	rockmeter.install("rockmeter_container_div");
+	ScriptBud.useRockMeter(rockmeter);
+}
+
 function showModal() {
 	if (modal == null) {
 		modal = createModal();
@@ -215,11 +255,11 @@ function openCurtain() {
 	let right = $("#curtain_right");
 
 	left.animate({
-		left: -800
+		left: -1200
 	}, 2000);
 
 	right.animate({
-		right: -800
+		right: -1200
 	}, 2000);
 }
 
@@ -238,6 +278,8 @@ function closeCurtain() {
 
 function setupScript(play, character) {
 	if (ScriptBud.init()) {
+		changeVenue(1);
+		ScriptBud.onScoreChange(scoreChanged);
 		// Browser is supported. 
 		ScriptBud.loadScript(play);
 		$("#playname").text(play);

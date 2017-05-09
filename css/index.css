@@ -10,12 +10,21 @@ h1 {
 	display: block;
 }
 
+body {
+	background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+#playname {
+	z-index: 5;
+}
+
 #fullpage {
 	padding: 50px 0;
 	text-align: center;
 }
 
-#character {
+#stage {
 	position: relative;
 }
 
@@ -32,6 +41,37 @@ h1 {
 
 #charName {
 	font-style: italic;
+}
+
+#rockmeter_container_div {
+	position: fixed;
+	display: ;
+	right: 500px;
+	bottom: 240px;
+}
+
+#score {
+	position: absolute;
+	top: -60px;
+	width: 290px;
+	background: white;
+	border: 1px solid black;
+	opacity: .4;
+	font-size: 45px;
+	font-style: bold;
+	text-align: center;
+}
+
+#playname {
+	background: white;
+	border: 1px solid black;
+	opacity: .6;
+}
+
+#charname {
+	background: white;
+	border: 1px solid black;
+	opacity: .4;
 }
 
 #line_container {
@@ -68,7 +108,23 @@ h1 {
 	position: absolute;
 }
 
+#curtain_top {
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	position: fixed;
+	z-index: 4;
+}
+
+#curtain_top img {
+	width: 100%;
+	height: 200px;
+}
+
 #line_information {
+	padding: 4px;
+	background-color: white;
+	border: 1px solid black;
 	margin-left: auto;
 	margin-right: auto;
 	position: fixed;

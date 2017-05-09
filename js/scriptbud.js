@@ -1,34 +1,50 @@
 /* relies on <ResponsiveVoice.JS> */
 var ScriptBud = {
-	init: function(script, htmlElement) {
+	init: function(script, htmlElement, ) {
 		this.humans = [];
 		this.script = null;
 		this.stopped = true;
-		this.timeout = 10 * 1000;
+		this.scoreListeners = [];
+		this.timeout = 7 * 1000;
+		this.score = 0;
+		this.satisfaction = 50; // start halfway.
+		if (this.meter) {
+			this.meter.setProgress(this.satisfaction);
+		}
 
 		if (typeof SpeechRecognition === "undefined" && typeof webkitSpeechRecognition === "undefined") {
 			console.error("[scriptbud] No speech recognition available in this browser. The plugin will not function. (Try chrome).");
 			return false;
 		}
 
-		this.boo_sound = new Pizzicato.Sound('./sound/boo.mp3', function() {
-		    // Sound loaded!
-		    console.log("[scriptbud] Loaded audio.");
-		});
-		this.boo = $.proxy(function() {
-			if (this.boo_sound) {
-				this.boo_sound.play();
-			}
-		}, this);
-
+		if (!this.boo_sound) {
+			this.boo_sound = new Pizzicato.Sound('./sound/boo.mp3', function() {
+			    // Sound loaded!
+			    console.log("[scriptbud] Loaded audio.");
+			});
+		}
+		
 		let self = this;
-		this.loaded_clap_sounds = {};
 
-		let clap_sounds = $.map(["applause5.mp3", "applause6.mp3", "applause7.mp3"], (obj) => new Pizzicato.Sound('./sound/' + obj, function() {
-		    // Sound loaded!
-		    self.loaded_clap_sounds[obj] = clap_sounds[obj];
-		    console.log("[scriptbud] Loaded " + obj);
-		}));
+		if (!this.loaded_clap_sounds) {
+			this.loaded_clap_sounds = [];
+			let applauses = ["applause5.mp3", "applause6.mp3", "applause7.mp3"];
+			this.remaining_applauses = applauses.length;
+
+			for (let i = 0; i < applauses.length; i++) {
+				this.loaded_clap_sounds.push(new Pizzicato.Sound('./sound/' + applauses[i], function(){
+					console.log("[scriptbud] Loaded " + applauses[i]);
+					self.remaining_applauses = self.remaining_applauses - 1;
+				}));
+			}
+		}
+
+		if (!this.gameover_sound) {
+			this.gameover_sound = new Pizzicato.Sound('./sound/hellodarkness.mp3', function() {
+			    // Sound loaded!
+			    console.log("[scriptbud] Loaded audio.");
+			});
+		}
 		
 		this.SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
 		this.SpeechGrammarList = webkitSpeechGrammarList || SpeechGrammarList;
@@ -39,13 +55,42 @@ var ScriptBud = {
 		return true;
 	},
 
+	gameover: function(then) {
+		this.gameover_sound.play();
+		setTimeout($.proxy(function() {
+			this.gameover_sound.stop();
+			then();
+		},this), 15000);
+	},
+
+	onScoreChange: function(listener) {
+		this.scoreListeners.push(listener);
+		listener(this.satisfaction, this.score);
+	},
+
+	_scoreDidChange: function() {
+		console.log("Score changed: " + this.score);
+		console.log("Alerting " + this.scoreListeners.length + " listeners");
+		for (let i = 0; i < this.scoreListeners.length; i++) {
+			this.scoreListeners[i](this.satisfaction, this.score);
+		}
+	},
+
+	useRockMeter: function(meter) {
+		this.meter = meter;
+	},
+
+	boo: function() {
+		if (this.boo_sound) {
+			this.boo_sound.play();
+		}
+	},
+
 	clap: function() {
-		if (this.loaded_clap_sounds) {
+		if (this.remaining_applauses == 0) {
 			console.log("[scriptbud] Clapping.");
 			let randClap = this.loaded_clap_sounds[Math.floor(Math.random() * this.loaded_clap_sounds.length)]
-			if (randClap) {
-				randClap.play();
-			}
+			randClap.play();
 		}
 	},
 
@@ -100,6 +145,11 @@ var ScriptBud = {
 				/* nothing has changed. */
 				console.log("[error] Line timed out.");
 				this.boo(); // BOOOOOO
+				this.satisfaction -= 15;
+				if (this.meter) {
+					this.meter.setProgress(this.satisfaction);
+				}
+				this._scoreDidChange();
 				this.step();
 			}
 		}, this), amt);
@@ -169,10 +219,17 @@ var ScriptBud = {
 				this.waiting = false;
 				this.__startTrackingAudio(false);
 
-				if (Math.random() > .3) {
+				if (Math.random() > .8) {
 					// clapping every time is fkning annoying
 					this.clap();
 				}
+
+				this.satisfaction += 7;
+				this.score += currentLine.length * 70;
+				if (this.meter) {
+					this.meter.setProgress(this.satisfaction);
+				}
+				this._scoreDidChange();
 				this.step();
 				return;
 			}
